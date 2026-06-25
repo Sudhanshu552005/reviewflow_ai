@@ -27,8 +27,10 @@ def generate_beautified_qr(business_id, business_name, category, custom_category
     # Render upper category template frame block
     image_draw.rectangle([0, 0, card_width, 110], fill=theme["bg"])
     
-    # Compile the target customer-facing entry endpoint parameters
-    customer_facing_url = f"http://127.0.0.1:5000/review/{business_id}"
+    # =========================================================================
+    # 👑 PRODUCTION REDIRECT PROTOCOL: Bake the Render domain into the QR matrix
+    # =========================================================================
+    customer_facing_url = f"https://reviewflow-app-lpqi.onrender.com/review/{business_id}"
     
     # Configure QR matrix configurations
     qr = qrcode.QRCode(
