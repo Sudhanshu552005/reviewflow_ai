@@ -1,0 +1,108 @@
+{% extends 'base.html' %} 
+{% block content %} 
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"> 
+    
+    <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-b from-slate-50/50 to-white"> 
+        <h1 class="text-2xl font-bold text-slate-900">Register Your Business</h1> 
+        <p class="text-sm text-slate-500 mt-1">Configure your reputation engine and deploy a beautified QR code instantly.</p> 
+    </div> 
+
+    <form action="/register" method="POST" class="p-6 sm:p-8 space-y-6"> 
+        
+        <div> 
+            <label for="business_name" class="block text-sm font-semibold text-slate-700">Business Name *</label> 
+            <input type="text" id="business_name" name="business_name" required placeholder="e.g., Basque Restaurant" class="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"> 
+        </div> 
+
+        <div> 
+            <label for="business_category" class="block text-sm font-semibold text-slate-700">Business Category *</label> 
+            <select id="business_category" name="business_category" required onchange="toggleCustomCategoryField()" class="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"> 
+                <option value="" disabled selected>Select your industry vertical...</option> 
+                <option value="Restaurant">Restaurant / Cafe</option> 
+                <option value="Automobile">Automobile / Tyre Shop</option> 
+                <option value="Retail">Clothing / Fashion Retail</option> 
+                <option value="Salon">Salon / Spa</option> 
+                <option value="Hospitality">Hospitality / Homestay</option> 
+                <option value="Custom">Custom / Blended Category (e.g. Cafe + Bakery)</option> 
+            </select> 
+        </div> 
+
+        <div id="custom_category_wrapper" class="hidden"> 
+            <label for="custom_category" class="block text-sm font-semibold text-slate-700">Specify Blended Category Name *</label> 
+            <input type="text" id="custom_category" name="custom_category" placeholder="e.g., Cafe + Bakery" class="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"> 
+        </div> 
+
+        <div> 
+            <label for="place_id" class="block text-sm font-semibold text-slate-700">Google Place ID *</label> 
+            <input type="text" id="place_id" name="place_id" required placeholder="e.g., ChIJ4zGv6zkxdDkR0Z0w8vQSu9A" class="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-mono placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"> 
+        </div> 
+
+        <div class="border-t border-slate-100 my-6 pt-6"></div> 
+
+        <div> 
+            <div class="flex justify-between items-center mb-1"> 
+                <label for="sentiment_threshold" class="block text-sm font-semibold text-slate-700">Sentiment Routing Threshold</label> 
+                <span id="threshold_val" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">4.0 Stars</span> 
+            </div> 
+            <p class="text-xs text-slate-400 mt-1 mb-4">Ratings below this value are securely captured as private feedback before reaching Google.</p> 
+            <input type="range" id="sentiment_threshold" name="sentiment_threshold" min="3.0" max="4.5" step="0.5" value="4.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="document.getElementById('threshold_val').innerText = parseFloat(this.value).toFixed(1) + ' Stars'"> 
+        </div> 
+
+        <div class="border-t border-slate-100 my-6 pt-6"></div> 
+
+        <div class="space-y-6"> 
+            <h3 class="text-xs font-bold text-slate-400 tracking-wide uppercase">Alert Channels & Recipients</h3> 
+            
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                <span class="text-[10px] font-extrabold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full tracking-wider uppercase">Primary Routing Node</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5"> 
+                        <label class="block text-xs font-bold text-slate-600">WhatsApp Phone Number * (Mandatory)</label> 
+                        <input type="text" name="primary_alert" required placeholder="e.g., 919876543210" class="w-full p-3 text-xs border border-slate-300 bg-white rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"> 
+                    </div> 
+                    <div class="space-y-1.5"> 
+                        <label class="block text-xs font-bold text-slate-600">Manager Email Address (Optional)</label> 
+                        <input type="text" name="primary_email" placeholder="e.g., manager@business.com" class="w-full p-3 text-xs border border-slate-300 bg-white rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"> 
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                <span class="text-[10px] font-extrabold px-2.5 py-1 bg-slate-200 text-slate-600 rounded-full tracking-wider uppercase">Alternate / Owner Backup Node</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5"> 
+                        <label class="block text-xs font-bold text-slate-600">Backup Phone Number (Optional)</label> 
+                        <input type="text" name="alternate_alert" placeholder="e.g., 919998887770" class="w-full p-3 text-xs border border-slate-300 bg-white rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"> 
+                    </div> 
+                    <div class="space-y-1.5"> 
+                        <label class="block text-xs font-bold text-slate-600">Owner Backup Email (Optional)</label> 
+                        <input type="text" name="alternate_email" placeholder="e.g., owner@business.com" class="w-full p-3 text-xs border border-slate-300 bg-white rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"> 
+                    </div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="pt-2"> 
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 px-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-center items-center"> 
+                Complete Onboarding & Generate Assets 
+            </button> 
+        </div> 
+    </form> 
+</div> 
+
+<script> 
+function toggleCustomCategoryField() { 
+    var selectField = document.getElementById("business_category"); 
+    var wrapper = document.getElementById("custom_category_wrapper"); 
+    var customInput = document.getElementById("custom_category"); 
+    if (selectField.value === "Custom") { 
+        wrapper.classList.remove("hidden"); 
+        customInput.setAttribute("required", "required"); 
+    } else { 
+        wrapper.classList.add("hidden"); 
+        customInput.removeAttribute("required"); 
+        customInput.value = ""; 
+    } 
+} 
+</script> 
+{% endblock %}

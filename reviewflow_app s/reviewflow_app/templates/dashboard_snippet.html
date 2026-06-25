@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+    <main class="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-12 flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">🎉 Engine Activated Successfully!</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Credentials flashed securely below. They have been synced to your alert maps matrix.</p>
+            </div>
+            <a href="/" class="bg-slate-100 text-slate-700 text-xs font-bold py-2.5 px-5 rounded-xl border border-slate-200">Return to Portal Login</a>
+        </div>
+        
+        <div class="lg:col-span-5 bg-gradient-to-br from-indigo-900 to-slate-950 p-6 rounded-3xl text-white space-y-4 shadow-md flex flex-col justify-between">
+            <div class="space-y-1">
+                <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Admin Access Portal Keys</h3>
+                <p class="text-xs text-slate-300">Use these unique values on the homepage to access your analytical console maps panels.</p>
+            </div>
+            <div class="bg-white/10 p-4 rounded-xl border border-white/10 font-mono space-y-2 text-sm">
+                <p>👤 USERNAME: <span class="text-amber-300 font-bold select-all">{{ g_user }}</span></p>
+                <p>🔑 PASSWORD: <span class="text-amber-300 font-bold select-all">{{ g_pass }}</span></p>
+            </div>
+            <p class="text-[10px] text-slate-400 italic">⚠️ Copy and save these keys immediately. They flash exactly once during generation cycles.</p>
+        </div>
+
+        <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs text-center flex flex-col items-center justify-center space-y-4">
+            <img src="/static/qr_codes/{{ qr_filename }}" class="max-w-[200px] rounded-xl border shadow-xs"/>
+            <div>
+                <h3 class="font-bold text-slate-800 text-lg">{{ name }}</h3>
+                <span class="text-xs font-semibold bg-indigo-50 text-indigo-600 px-3 py-0.5 rounded-full mt-1 inline-block">{{ display_category }} Node</span>
+            </div>
+            <a href="/review/{{ business_id }}" target="_blank" class="text-xs text-emerald-600 font-bold hover:underline">📱 Launch Dynamic Mobile Simulation Portal URL →</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super-Admin Control Console</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased min-h-screen">
+
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-md">
+        <span class="text-sm font-black text-purple-400">ReviewFlow Corporate Reseller Matrix Console</span>
+        <a href="/logout" class="text-xs text-rose-400 font-bold hover:underline">Master Log Out</a>
+    </nav>
+
+    <main class="max-w-7xl mx-auto w-full px-4 py-8 space-y-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total SaaS Network Clients</p>
+                <p class="text-3xl font-black text-purple-400 mt-1">{{ clients }} Businesses Deployed</p>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Processed Transactions</p>
+                <p class="text-3xl font-black text-emerald-400 mt-1">{{ logs }} Logs Monitored</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Deployed Client Organizations</h3>
+            <div class="bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+                <table class="w-full border-collapse text-left text-xs">
+                    <thead class="bg-slate-900 text-slate-500 uppercase font-bold border-b border-slate-800">
+                        <tr>
+                            <th class="p-4">Tenant Index ID</th>
+                            <th class="p-4">Business Client Name</th>
+                            <th class="p-4">Vertical Archetype</th>
+                            <th class="p-4">Total Interactions Volume</th>
+                            <th class="p-4">Performance Mean</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 text-slate-300">
+                        {% for s in shops %}
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 font-mono font-bold text-purple-400">#000{{ s.id }}</td>
+                            <td class="p-4 font-bold text-white">{{ s.name }}</td>
+                            <td class="p-4"><span class="bg-slate-900 border border-slate-800 px-2.5 py-1 rounded text-slate-400 font-medium">{{ s.category }}</span></td>
+                            <td class="p-4 font-mono text-slate-400">{{ s.total_scans }} metrics logged</td>
+                            <td class="p-4 font-extrabold text-amber-400">{{ s.platform_avg|round(2) if s.platform_avg else '0.00' }} ★</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Global Unified Transaction Telemetry Stream</h3>
+            <div class="bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+                <table class="w-full border-collapse text-left text-xs">
+                    <thead class="bg-slate-900 text-slate-500 uppercase font-bold border-b border-slate-800">
+                        <tr>
+                            <th class="p-4">Source Node</th>
+                            <th class="p-4">Sentiment Score</th>
+                            <th class="p-4">Captured Interaction Copy Data / Action Summary</th>
+                            <th class="p-4">Coordinates</th>
+                            <th class="p-4">Current Status Flag</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 text-slate-300">
+                        {% for log in master_stream %}
+                        <tr>
+                            <td class="p-4 font-bold text-white">{{ log.business_name }}</td>
+                            <td class="p-4 font-extrabold {% if log.overall_rating < 4 %}text-rose-400{% else %}text-emerald-400{% endif %}">{{ log.overall_rating }} ★</td>
+                            <td class="p-4 max-w-sm truncate font-medium text-slate-400">
+                                {% if log.complaint_text %}
+                                <span class="text-rose-400 font-bold">⚠️ Detractor Complaint: "{{ log.complaint_text }}"</span>
+                                {% elif log.selected_draft_text %}
+                                <span class="text-emerald-400">📋 Promoter Copied Draft: "{{ log.selected_draft_text }}"</span>
+                                {% else %}
+                                <span class="text-slate-500 italic">Direct manual deep-link maps bypass</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 font-mono text-slate-400 select-all">{{ log.customer_contact if log.customer_contact else 'Anonymous' }}</td>
+                            <td class="p-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
+                                    {% if log.status == 'New' %}bg-rose-950 text-rose-400 border border-rose-800
+                                    {% elif log.status == 'In Progress' %}bg-amber-950 text-amber-400 border border-amber-800
+                                    {% else %}bg-emerald-950 text-emerald-400 border border-emerald-800{% endif %}">
+                                    {{ log.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

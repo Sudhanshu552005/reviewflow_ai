@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Feedback</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body id="main_body" class="bg-slate-900 text-slate-100 antialiased min-h-screen flex flex-col justify-between select-none">
+
+    <div id="system_config" data-business-id="{{ business.id }}" data-threshold="{{ business.threshold }}" data-category="{{ business.category }}" data-place-id="{{ business.place_id }}" class="hidden"></div>
+    
+    <div id="toast" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold py-3 px-6 rounded-xl shadow-xl z-50 text-center w-[90%] border border-emerald-500">
+        🎉 Draft Copied! Redirecting straight to Google Maps...
+    </div>
+
+    <!-- COOLDOWN GATED LANDING VIEW OVERLAY BLOCK -->
+    <div id="cooldown_overlay" class="hidden fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-6 text-center animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl max-w-sm space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-amber-950 text-amber-400 border border-amber-800 rounded-2xl flex items-center justify-center text-xl mx-auto font-black">⏳</div>
+            <h2 class="text-base font-extrabold text-white tracking-tight">Daily Entry Limit Reached</h2>
+            <p class="text-xs text-slate-400 leading-relaxed font-medium">To keep review parameters authentic, this system restricts transactions to once every 24 hours per device path.</p>
+        </div>
+    </div>
+
+    <header id="theme_header" class="bg-slate-950 border-b border-slate-800 py-4 text-center sticky top-0 z-40 shadow-md transition-colors duration-500">
+        <h1 class="text-lg font-bold text-white tracking-tight">{{ business.name }}</h1>
+        <p id="theme_subtitle" class="text-[10px] font-bold tracking-wider uppercase mt-0.5 text-indigo-400">{{ business.category }} Digital Hub</p>
+    </header>
+
+    <main class="flex-grow max-w-md w-full mx-auto px-4 py-6 flex flex-col justify-start space-y-5">
+        <div class="bg-slate-950 rounded-3xl border border-slate-800/80 p-5 shadow-xl space-y-6">
+            
+            <!-- Overall Rating Capture -->
+            <div class="text-center space-y-2">
+                <h2 class="text-sm font-medium text-slate-300">How would you rate your overall experience?</h2>
+                <div class="flex justify-center space-x-2.5">
+                    {% for i in range(1, 6) %}
+                    <button type="button" data-star-value="{{ i }}" onclick="handleMainStarTap(this)" class="w-10 h-10 text-slate-700 text-4xl focus:outline-none transition-colors cursor-pointer" id="star_{{ i }}">★</button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- PROMOTER ACTIVE FUNNEL -->
+            <div id="dynamic_funnel" class="hidden space-y-6 border-t border-slate-800/80 pt-5">
+                <div class="space-y-3">
+                    <h2 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center">Experience Metrics</h2>
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/50 space-y-2.5">
+                        <p class="text-xs font-medium text-slate-400 text-center" id="sub_q1_label">Service Quality</p>
+                        <div class="flex justify-center space-x-2">
+                            {% for i in range(1, 6) %}
+                            <button type="button" data-sub1-value="{{ i }}" onclick="handleSub1Tap(this)" class="sub1-star text-slate-700 text-2xl focus:outline-none cursor-pointer" id="sub1_{{ i }}">★</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/50 space-y-2.5">
+                        <p class="text-xs font-medium text-slate-400 text-center" id="sub_q2_label">Operational Value</p>
+                        <div class="flex justify-center space-x-2">
+                            {% for i in range(1, 6) %}
+                            <button type="button" data-sub2-value="{{ i }}" onclick="handleSub2Tap(this)" class="sub2-star text-slate-700 text-2xl focus:outline-none cursor-pointer" id="sub2_{{ i }}">★</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h2 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center">Select Experience Highlights (Max 2)</h2>
+                    <div class="flex flex-wrap gap-2 justify-center" id="chips_container"></div>
+                </div>
+
+                <button type="button" onclick="sendAiGenerationRequest()" id="gen_btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-3.5 px-4 rounded-xl shadow-md cursor-pointer transition-colors">
+                    Generate My AI Review Options →
+                </button>
+            </div>
+
+            <!-- EXPANDED HIGH-FIDELITY DETRACTOR RECOVERY PIPELINE -->
+            <div id="detractor_box" class="hidden border-t border-slate-800 pt-5 space-y-4">
+                <div class="text-center space-y-1">
+                    <p class="text-xs font-bold text-rose-400">Help Us Fix This Right Away</p>
+                    <p class="text-[10px] text-slate-500">Your feedback is handled with maximum structural privacy.</p>
+                </div>
+                <form action="/feedback/{{ business.id }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="captured_stars" id="feedback_stars">
+                    
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Where did we fall short? (Select all that apply)</label>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <label class="flex items-center space-x-2.5 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+                                <input type="checkbox" name="improvements" value="Wait Time" class="accent-purple-500"> <span>Long Wait Time</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+                                <input type="checkbox" name="improvements" value="Staff Behavior" class="accent-purple-500"> <span>Staff Behavior</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+                                <input type="checkbox" name="improvements" value="Product Quality" class="accent-purple-500"> <span>Product Quality</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+                                <input type="checkbox" name="improvements" value="Cleanliness" class="accent-purple-500"> <span>Cleanliness</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Can you share more details about what happened?</label>
+                        <textarea name="complaint_text" required rows="3" placeholder="Tell us exactly what went wrong..." class="w-full p-3 text-xs border border-slate-800 rounded-xl bg-slate-900 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Optional: Your Contact Coordinates</label>
+                        <input type="text" name="customer_contact" placeholder="Leave Phone or Email so we can reach back to you" class="w-full p-3 text-xs border border-slate-800 rounded-xl bg-slate-900 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                        <p class="text-[9px] text-slate-500 italic">Leave details only if you want our manager to connect back once resolved.</p>
+                    </div>
+
+                    <button type="submit" id="detractor_submit_btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md cursor-pointer uppercase tracking-wider">
+                        Submit Private Recovery Parameters
+                    </button>
+                </form>
+                <div class="text-center pt-2">
+                    <a href="https://search.google.com/local/writereview?placeid={{ business.place_id }}" class="text-[10px] text-slate-500 hover:text-indigo-400 underline">Bypass directly to Google Maps</a>
+                </div>
+            </div>
+
+            <!-- AI CAROUSEL MODULE -->
+            <div id="ai_output_box" class="hidden border-t border-slate-800/80 pt-5 space-y-4">
+                <div class="text-center space-y-0.5">
+                    <h3 id="theme_carousel_title" class="text-xs font-bold uppercase tracking-wider text-indigo-400">Your Tailored Review Templates</h3>
+                    <p class="text-[10px] text-slate-500">Swipe horizontally to view variants. Tap inside to edit text freely.</p>
+                </div>
+                
+                <div class="flex overflow-x-auto gap-4 pb-4 no-scrollbar snap-x snap-mandatory" id="ai_variants_wrapper"></div>
+                
+                <!-- SECTION 8.4: CHARACTER EDIT NUDGE ALERTS BAR -->
+                <div id="edit_nudge_bar" class="bg-amber-950/40 border border-amber-900 rounded-xl p-3 text-center transition-all">
+                    <p id="nudge_message" class="text-[10px] font-medium text-amber-400 tracking-tight">💡 Add a detail to make it yours! (Light edits avoid automated filters)</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3" id="remix_panel">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex justify-between items-center">
+                        <span>AI Assistant Refinement Tools</span>
+                        <span id="mic_status" class="text-rose-400 hidden animate-pulse">● Recording</span>
+                    </p>
+                    <div class="flex gap-2">
+                        <button onclick="remixDraft('neutral')" class="flex-1 py-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer">Make Neutral</button>
+                        <button onclick="remixDraft('enthusiastic')" class="flex-1 py-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer">Make Enthusiastic</button>
+                        <button type="button" id="mic_btn" onclick="toggleVocalCapture()" class="px-3 bg-rose-950 border border-rose-800 hover:bg-rose-900 text-rose-400 rounded-lg text-xs flex items-center justify-center transition-colors cursor-pointer">🎤 Voice Add-on</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="py-3 text-center text-[9px] text-slate-600 tracking-widest uppercase bg-slate-950 border-t border-slate-900/60">
+        SECURE INLINE ROUTER • REVIEWFLOW PLATFORM FRAMEWORK
+    </footer>
+
+    <script>
+        // SECTION 8.2: VISUAL IDENTITY SCHEME Presets
+        const skinMatrix = {
+            "Restaurant": { header: "bg-orange-800", text: "text-orange-400", button: "bg-orange-600", border: "border-orange-900/40", primary: "Restaurant" },
+            "Automobile": { header: "bg-slate-700", text: "text-orange-500", button: "bg-orange-600", border: "border-orange-500/30", primary: "Automobile" },
+            "Retail": { header: "bg-pink-700", text: "text-pink-400", button: "bg-pink-600", border: "border-pink-900/40", primary: "Retail" },
+            "Salon": { header: "bg-purple-800", text: "text-purple-400", button: "bg-purple-600", border: "border-purple-900/40", primary: "Salon" },
+            "Hospitality": { header: "bg-blue-900", text: "text-yellow-500", button: "bg-blue-700", border: "border-blue-900/40", primary: "Hospitality" }
+        };
+
+        const expandedMatrix = {
+            "Restaurant": ["Delicious Food", "Friendly Staff", "Great Ambience", "Fast Service", "Value for Money", "Spacious Seating", "Clean Cutlery", "Trendy Music", "Fresh Ingredients", "Easy Parking", "Average Portions", "Standard Menu", "Crowded Layout", "Slow Billing", "Cold Serving"],
+            "Automobile": ["Honest Pricing", "Quick Turnaround", "Skilled Mechanics", "Clean Waiting Area", "No Upselling", "OEM Parts", "Detailing Focus", "Professional Diagnostic", "Clear Estimate", "Polite Wash", "Fixed Scheduling", "Standard Waiting", "Basic Equipment", "Delayed Handover", "Misplaced Tools"],
+            "Retail": ["Great Collection", "Helpful Staff", "Good Fitting Room", "Trendy Pieces", "Fair Prices", "Well Lit Shelves", "Easy Exchange", "Organized Aisles", "Premium Fabric", "Quick Checkout", "Limited Sizes", "Modest Stock", "Crowded Trays", "Unattentive Staff", "High Billing Wait"],
+            "Salon": ["Relaxing", "Skilled Stylist", "Clean & Hygienic", "On Time", "Worth the Price", "Premium Oils", "Soft Lighting", "Quiet Environment", "Calm Music", "Polite Front Desk", "Average Massage", "Standard Styling", "Basic Scissors", "Slight Delay", "Messy Counter"],
+            "Hospitality": ["Warm Hospitality", "Spotless Rooms", "Great Food", "Attentive Staff", "Beautiful Setting", "Fast Wi-Fi", "Soft Pillows", "Clean Pools", "Scenic Balcony", "Clear Invoicing", "Standard Buffets", "Modest Lobby", "Average Linens", "Noisy Corridors", "Delayed Room-Service"]
+        };
+
+        let rating = 0, sub1 = 0, sub2 = 0, activeVariantIndex = 0;
+        const selectedChips = new Set();
+        const originalDrafts = {}; // Tracks mutations to compute dynamic distances
+        const config = document.getElementById("system_config");
+        const bCategory = config.getAttribute("data-category");
+        const bThreshold = parseFloat(config.getAttribute("data-threshold"));
+        let recognition;
+
+        // SECTION 8.2: LIVE THEME APPLICATION INITIALIZATION
+        document.addEventListener("DOMContentLoaded", async function() {
+            const activeSkin = skinMatrix[bCategory] || skinMatrix["Restaurant"];
+            
+            // Re-skin top header components dynamically
+            const headerBlock = document.getElementById("theme_header");
+            headerBlock.className = `${activeSkin.header} border-b border-slate-800 py-4 text-center sticky top-0 z-40 shadow-md`;
+            
+            const textSubtitle = document.getElementById("theme_subtitle");
+            textSubtitle.className = `text-[10px] font-bold tracking-wider uppercase mt-0.5 ${activeSkin.text}`;
+            
+            // Re-skin generation actions buttons
+            document.getElementById("gen_btn").className = `w-full ${activeSkin.button} text-white font-semibold text-sm py-3.5 px-4 rounded-xl shadow-md cursor-pointer`;
+            document.getElementById("detractor_submit_btn").className = `w-full ${activeSkin.button} text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md cursor-pointer uppercase tracking-wider`;
+
+            // SECTION 8.5.3: EXECUTE VERIFICATION ROUTINE FOR COOLDOWN SIGS
+            const coolCheck = await fetch('/api/verify_cool_down', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ business_id: config.getAttribute("data-business-id") })
+            });
+            const coolRes = await coolCheck.json();
+            if (coolRes.is_gated) {
+                document.getElementById("cooldown_overlay").classList.remove("hidden");
+            }
+        });
+
+        function handleMainStarTap(el) {
+            rating = parseInt(el.getAttribute("data-star-value"));
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`star_${i}`).classList.toggle('text-amber-400', i <= rating);
+                document.getElementById(`star_${i}`).classList.toggle('text-slate-700', i > rating);
+            }
+            if (rating >= bThreshold) {
+                document.getElementById("detractor_box").classList.add("hidden");
+                buildSubFlow();
+                document.getElementById("dynamic_funnel").classList.remove("hidden");
+            } else {
+                document.getElementById("dynamic_funnel").classList.add("hidden");
+                document.getElementById("ai_output_box").classList.add("hidden");
+                document.getElementById("feedback_stars").value = rating;
+                document.getElementById("detractor_box").classList.remove("hidden");
+            }
+        }
+
+        function buildSubFlow() {
+            const data = expandedMatrix[bCategory] || expandedMatrix["Restaurant"];
+            const container = document.getElementById("chips_container");
+            container.innerHTML = "";
+            data.forEach(chip => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.innerText = chip;
+                btn.className = "px-2.5 py-1 text-[11px] rounded-lg bg-slate-900 text-slate-400 border border-slate-800/80 font-medium cursor-pointer transition-all";
+                btn.onclick = () => {
+                    if (selectedChips.has(chip)) {
+                        selectedChips.delete(chip);
+                        btn.className = "px-2.5 py-1 text-[11px] rounded-lg bg-slate-900 text-slate-400 border border-slate-800/80 font-medium cursor-pointer transition-all";
+                    } else if (selectedChips.size < 2) {
+                        selectedChips.add(chip);
+                        btn.className = "px-2.5 py-1 text-[11px] rounded-lg bg-indigo-950 text-indigo-400 border border-indigo-800/80 font-semibold cursor-pointer transition-all";
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function handleSub1Tap(el) {
+            sub1 = parseInt(el.getAttribute("data-sub1-value"));
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`sub1_${i}`).classList.toggle('text-indigo-400', i <= sub1);
+                document.getElementById(`sub1_${i}`).classList.toggle('text-slate-700', i > sub1);
+            }
+        }
+
+        function handleSub2Tap(el) {
+            sub2 = parseInt(el.getAttribute("data-sub2-value"));
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`sub2_${i}`).classList.toggle('text-indigo-400', i <= sub2);
+                document.getElementById(`sub2_${i}`).classList.toggle('text-slate-700', i > sub2);
+            }
+        }
+
+        async function sendAiGenerationRequest() {
+            const btn = document.getElementById("gen_btn");
+            btn.innerText = "⏳ Accessing Groq AI Grid Matrix...";
+            btn.disabled = true;
+            const res = await fetch(`/api/generate_review/${config.getAttribute("data-business-id")}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rating, sub1, sub2, chips: Array.from(selectedChips) })
+            });
+            const data = await res.json();
+            btn.innerText = "Generate My AI Review Options →";
+            btn.disabled = false;
+            if (data.success) { renderCarouselDrafts(data.drafts, data.redirect_url); }
+        }
+
+        function renderCarouselDrafts(drafts, redirectUrl) {
+            const wrapper = document.getElementById("ai_variants_wrapper");
+            wrapper.innerHTML = "";
+            const activeSkin = skinMatrix[bCategory] || skinMatrix["Restaurant"];
+            
+            drafts.forEach((draft, index) => {
+                originalDrafts[index] = draft; // Save pristine string footprint
+                const card = document.createElement("div");
+                card.className = "w-[290px] shrink-0 snap-center p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-3 flex flex-col justify-between";
+                card.innerHTML = `
+                    <textarea id="text_${index}" oninput="monitorEditDistance(${index})" onfocus="activeVariantIndex=${index}" class="w-full p-2 text-xs text-slate-200 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 leading-relaxed font-normal" rows="4">${draft}</textarea>
+                    <button onclick="copyAndRedirect(${index}, '${redirectUrl}')" class="w-full py-2.5 ${activeSkin.button} text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-md">📋 Copy & Open Maps</button>
+                `;
+                wrapper.appendChild(card);
+            });
+            
+            document.getElementById("theme_carousel_title").className = `text-xs font-bold uppercase tracking-wider ${activeSkin.text}`;
+            document.getElementById("ai_output_box").classList.remove("hidden");
+            document.getElementById("ai_output_box").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // SECTION 8.4: CHARACTER EDIT TELEMETRY TRACKER LOGIC
+        function monitorEditDistance(index) {
+            const currentText = document.getElementById(`text_${index}`).value.trim();
+            const originalText = originalDrafts[index].trim();
+            
+            const nudgeBar = document.getElementById("edit_nudge_bar");
+            const nudgeMessage = document.getElementById("nudge_message");
+            
+            if (currentText !== originalText) {
+                nudgeBar.className = "bg-emerald-950/40 border border-emerald-900 rounded-xl p-3 text-center transition-all";
+                nudgeMessage.className = "text-[10px] font-medium text-emerald-400 tracking-tight";
+                nudgeMessage.innerText = "✨ Perfect modification! This helps bypass automated platform detection.";
+            } else {
+                nudgeBar.className = "bg-amber-950/40 border border-amber-900 rounded-xl p-3 text-center transition-all";
+                nudgeMessage.className = "text-[10px] font-medium text-amber-400 tracking-tight";
+                nudgeMessage.innerText = "💡 Add a detail to make it yours! (Light edits avoid automated filters)";
+            }
+        }
+
+        async function remixDraft(tone) {
+            const activeTextarea = document.getElementById(`text_${activeVariantIndex}`);
+            const currentText = activeTextarea.value;
+            activeTextarea.value = "⏳ Tuning phrase metrics...";
+            const res = await fetch('/api/remix_tone', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: currentText, tone: tone })
+            });
+            const data = await res.json();
+            if (data.success) { 
+                activeTextarea.value = data.remixed_text;
+                originalDrafts[activeVariantIndex] = data.remixed_text; // Reset base baseline tracking
+                monitorEditDistance(activeVariantIndex);
+            }
+        }
+
+        function toggleVocalCapture() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Voice features are unsupported on this mobile browser engine."); return;
+            }
+            const SpeechEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!recognition) {
+                recognition = new SpeechEngine(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-IN';
+                recognition.onstart = () => { document.getElementById("mic_status").classList.remove("hidden"); };
+                recognition.onresult = async (event) => {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById("mic_status").classList.add("hidden");
+                    const activeTextarea = document.getElementById(`text_${activeVariantIndex}`);
+                    const baselineText = activeTextarea.value;
+                    activeTextarea.value = "⏳ Formatting voice insertion layers...";
+                    const response = await fetch('/api/append_voice', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ base_text: baselineText, voice_input: spokenText })
+                    });
+                    const data = await response.json();
+                    if (data.success) { 
+                        activeTextarea.value = data.final_text;
+                        originalDrafts[activeVariantIndex] = data.final_text; // Sync footprint modifications
+                        monitorEditDistance(activeVariantIndex);
+                    }
+                };
+                recognition.onerror = () => { document.getElementById("mic_status").classList.add("hidden"); };
+                recognition.onend = () => { document.getElementById("mic_status").classList.add("hidden"); };
+            }
+            recognition.start();
+        }
+
+        function copyAndRedirect(idx, redirectUrl) {
+            const text = document.getElementById(`text_${idx}`).value;
+            const bizId = config.getAttribute("data-business-id");
+            
+            // Log interaction telemetry
+            fetch('/api/log_copied_text', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ business_id: bizId, rating: rating, text: text })
+            });
+
+            // Get the clean, raw Place ID from our HTML template element
+            const rawPlaceIdElement = document.getElementById("place_id") || document.querySelector("[data-place-id]");
+            let stablePlaceId = "";
+
+            if (rawPlaceIdElement) {
+                stablePlaceId = rawPlaceIdElement.value || rawPlaceIdElement.getAttribute("data-place-id") || "";
+            }
+
+            if (!stablePlaceId) {
+                const pureToken = redirectUrl.match(/ChIJ[a-zA-Z0-9_\-]+/);
+                stablePlaceId = pureToken ? pureToken[0] : redirectUrl;
+            }
+
+            stablePlaceId = stablePlaceId.replace(/[\]\)\s"']/g, "").trim();
+
+            // 👑 THE OFFICIAL GOOGLE MAPS API REDIRECT SCHEMA (Works everywhere without 404/400 errors)
+            const perfectGoogleUrl = "https://www.google.com/maps/search/?api=1&query=Google&query_place_id=" + stablePlaceId;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast"); 
+                toast.classList.remove("hidden");
+                setTimeout(() => { 
+                    // Break out cleanly to the live business place card
+                    window.location.href = perfectGoogleUrl; 
+                }, 1200);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-3xl border border-purple-100 shadow-xl overflow-hidden p-6 sm:p-8 space-y-6 mt-10">
+    <div class="text-center space-y-1.5">
+        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Central Access Authentication</h1>
+        <p class="text-xs text-slate-400">Log into your dedicated insights console or register an architectural node.</p>
+    </div>
+    
+    <form action="/login" method="POST" class="space-y-4">
+        <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Account Identifier Username</label>
+            <input type="text" name="username" required placeholder="e.g. dbs_admin or owner_1" class="mt-1.5 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-500 focus:bg-white transition-all">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Secure Access Token Passcode</label>
+            <input type="password" name="password" required placeholder="••••••••" class="mt-1.5 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-500 focus:bg-white transition-all">
+        </div>
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold text-xs py-3.5 rounded-xl shadow-md shadow-purple-500/20 transition-all cursor-pointer tracking-wider uppercase">
+            Authenticate & Open Console →
+        </button>
+    </form>
+    
+    <div class="text-center border-t border-purple-50 pt-4">
+        <a href="/register_portal" class="text-xs text-purple-600 font-semibold hover:text-purple-700 hover:underline">
+            Deploy New Entity Network Profile Hub →
+        </a>
+    </div>
+</div>
+{% endblock %}
