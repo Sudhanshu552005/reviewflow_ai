@@ -443,18 +443,13 @@ def api_append_voice():
 # 📱 CUSTOMER PHONE MICRO-UI FUNNEL GENERATIONS
 # =========================================================================
 
-@app.route("/review/<business_id>", methods=["GET"])
+@app.route("/review/<int:business_id>", methods=["GET"])
 def customer_review_portal(business_id):
     conn = get_db_connection()
-    business = conn.execute(
-        "SELECT * FROM businesses WHERE id = ?",
-        (business_id,)
-    ).fetchone()
+    business = conn.execute("SELECT * FROM businesses WHERE id = ?", (business_id,)).fetchone()
     conn.close()
-
     if not business:
-        return "Business Not Found", 404
-
+        return "Tenant Profile Index Unassigned", 404
     return render_template("review.html", business=business)
 
 @app.route("/api/generate_review/<int:business_id>", methods=["POST"])
