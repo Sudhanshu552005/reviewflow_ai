@@ -29,7 +29,7 @@ def generate_beautified_qr(business_id, business_name, category, custom_category
     draw.rectangle([0, 0, card_width, 110], fill=theme["bg"])
 
     # ✅ IMPORTANT: production-safe URL
-    customer_facing_url = f"https://reviewflow-app-lpqi.onrender.com/review/{business_id}"
+   customer_facing_url = f"https://reviewflow-apps.onrender.com/review/{business_id}"
 
     # ✅ FIXED QR SETTINGS (THIS IS THE MAIN FIX)
     qr = qrcode.QRCode(
